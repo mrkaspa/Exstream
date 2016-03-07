@@ -7,21 +7,20 @@ defmodule Exstreme.StreamGraphTest do
   def params, do: []
 
   def create_graph do
-    graph = StreamGraph.create_graph(params)
-
-    {graph, n1} = graph |> StreamGraph.create_node(params)
-    {graph, n2} = graph |> StreamGraph.create_node(params)
-
-    graph
-    |> StreamGraph.add_connection(n1, n2)
+    with(
+      graph       <- StreamGraph.create_graph(params),
+      {graph, n1} <- StreamGraph.create_node(graph, params),
+      {graph, n2} <- StreamGraph.create_node(graph, params),
+      do: StreamGraph.add_connection(graph, n1, n2)
+    )
   end
 
   test "creates a valid graph struct" do
-    graph = %Graph{
+    compare_graph = %Graph{
       nodes: %{n1: [], n2: []},
       connections: [{:n1, :n2}]
     }
-    assert create_graph == graph
+    assert create_graph == compare_graph
   end
 
   test "throws an error when adding again the relation" do
@@ -45,15 +44,65 @@ defmodule Exstreme.StreamGraphTest do
     end
   end
 
-    test "can create n3 and add a relatio between n2 and n3" do
-      graph = %Graph{
-        nodes: %{n1: [], n2: []},
-        connections: [{:n1, :n2}]
-      }
+  test "can create n3 and add a relation between n2 and n3" do
+    compare_graph = %Graph{
+      nodes: %{n1: [], n2: [], n3: []},
+      connections: [{:n1, :n2}, {:n2, :n3}]
+    }
 
-      {new_graph, _} = create_graph |> StreamGraph.create_node(params)
-      new_graph =
-        new_graph
-        |> StreamGraph.add_connection(:n2, :n3)
-    end
+    new_graph =
+      with(
+        {graph, n3} <- StreamGraph.create_node(create_graph, params),
+        do: graph |> StreamGraph.add_connection(:n2, n3)
+      )
+
+    assert new_graph == compare_graph
+  end
+
+  test "can add a broadcast an many nodes to the broadcast" do
+    compare_graph = %Graph{
+      nodes: %{n1: [], n2: [], b1: [], n3: [], n4: []},
+      connections: [{:n1, :n2}, {:n2, :b1}, {:b1, [:n4, :n3]}]
+    }
+
+    new_graph =
+      with(
+        {graph, b1} <- StreamGraph.create_broadcast(create_graph, params),
+        {graph, n3} <- StreamGraph.create_node(graph, params),
+        {graph, n4} <- StreamGraph.create_node(graph, params)
+      ) do
+          graph
+            |> StreamGraph.add_connection(:n2, b1)
+            |> StreamGraph.add_connection(b1, n3)
+            |> StreamGraph.add_connection(b1, n4)
+        end
+
+    assert new_graph == compare_graph
+  end
+
+  test "can add a funnel" do
+    compare_graph = %Graph{
+      nodes: %{n1: [], n2: [], b1: [], n3: [], n4: [], f1: [], n5: []},
+      connections: [{:n1, :n2}, {:n2, :b1}, {:b1, [:n4, :n3]}, {:n3, :f1}, {:n4, :f1}, {:f1, :n5}]
+    }
+
+    new_graph =
+      with(
+        {graph, b1} <- StreamGraph.create_broadcast(create_graph, params),
+        {graph, n3} <- StreamGraph.create_node(graph, params),
+        {graph, n4} <- StreamGraph.create_node(graph, params),
+        {graph, f1} <- StreamGraph.create_funnel(graph, params),
+        {graph, n5} <- StreamGraph.create_node(graph, params)
+      ) do
+          graph
+            |> StreamGraph.add_connection(:n2, b1)
+            |> StreamGraph.add_connection(b1, n3)
+            |> StreamGraph.add_connection(b1, n4)
+            |> StreamGraph.add_connection(n3, f1)
+            |> StreamGraph.add_connection(n4, f1)
+            |> StreamGraph.add_connection(f1, n5)
+        end
+
+    assert new_graph == compare_graph
+  end
 end
