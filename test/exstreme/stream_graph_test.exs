@@ -18,7 +18,7 @@ defmodule Exstreme.StreamGraphTest do
   test "creates a valid graph struct" do
     compare_graph = %Graph{
       nodes: %{n1: [], n2: []},
-      connections: [{:n1, :n2}]
+      connections: %{n1: :n2}
     }
     assert create_graph == compare_graph
   end
@@ -47,7 +47,7 @@ defmodule Exstreme.StreamGraphTest do
   test "can create n3 and add a relation between n2 and n3" do
     compare_graph = %Graph{
       nodes: %{n1: [], n2: [], n3: []},
-      connections: [{:n1, :n2}, {:n2, :n3}]
+      connections: %{n1: :n2, n2: :n3}
     }
 
     new_graph =
@@ -62,7 +62,7 @@ defmodule Exstreme.StreamGraphTest do
   test "can add a broadcast an many nodes to the broadcast" do
     compare_graph = %Graph{
       nodes: %{n1: [], n2: [], b1: [], n3: [], n4: []},
-      connections: [{:n1, :n2}, {:n2, :b1}, {:b1, [:n4, :n3]}]
+      connections: %{n1: :n2, n2: :b1, b1: [:n4, :n3]}
     }
 
     new_graph =
@@ -83,7 +83,7 @@ defmodule Exstreme.StreamGraphTest do
   test "can add a funnel" do
     compare_graph = %Graph{
       nodes: %{n1: [], n2: [], b1: [], n3: [], n4: [], f1: [], n5: []},
-      connections: [{:n1, :n2}, {:n2, :b1}, {:b1, [:n4, :n3]}, {:n3, :f1}, {:n4, :f1}, {:f1, :n5}]
+      connections: %{n1: :n2, n2: :b1, b1: [:n4, :n3], n3: :f1, n4: :f1, f1: :n5}
     }
 
     new_graph =

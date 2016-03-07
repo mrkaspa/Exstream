@@ -2,7 +2,7 @@ defmodule Exstreme.StreamGraph do
   @moduledoc """
   """
   defmodule Graph do
-    defstruct params: [], nodes: %{}, connections: []
+    defstruct params: [], nodes: %{}, connections: %{}
   end
 
   @doc """
@@ -49,7 +49,7 @@ defmodule Exstreme.StreamGraph do
   defp store_connection_fn(start, finish) do
     fn(connections) ->
       add_connection = fn(keywords, start, finish) ->
-        Keyword.update(keywords, start, finish, fn(value)->
+        Map.update(keywords, start, finish, fn(value)->
           if is_list(value) do
             [finish | value]
           else
@@ -107,7 +107,7 @@ defmodule Exstreme.StreamGraph do
   defp validate_position_start(connections, node, msg) do
     exist =
       connections
-      |> Keyword.has_key?(node)
+      |> Map.has_key?(node)
     if exist do
       raise ArgumentError, message: msg
     else
@@ -118,7 +118,7 @@ defmodule Exstreme.StreamGraph do
   defp validate_position_end(connections, node, msg) do
     exist =
       connections
-      |> Keyword.values
+      |> Map.values
       |> Enum.member?(node)
     if exist do
       raise ArgumentError, message: msg
