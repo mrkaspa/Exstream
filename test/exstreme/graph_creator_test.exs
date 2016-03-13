@@ -1,5 +1,6 @@
 defmodule Exstreme.GraphCreatorTest do
   use ExUnit.Case
+  use Exstreme.Common
   alias Exstreme.GraphCreator
   alias Exstreme.Graph
   doctest Exstreme.GraphCreator
@@ -86,16 +87,5 @@ defmodule Exstreme.GraphCreatorTest do
         |> GraphCreator.add_connection(f1, n5)
 
     assert new_graph == compare_graph
-  end
-
-  # private
-
-  defp params, do: []
-
-  defp create_graph do
-    graph = GraphCreator.create_graph(params)
-    {graph, n1} = GraphCreator.create_node(graph, params)
-    {graph, n2} = GraphCreator.create_node(graph, params)
-    GraphCreator.add_connection(graph, n1, n2)
   end
 end
