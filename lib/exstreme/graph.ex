@@ -20,7 +20,8 @@ defmodule Exstreme.Graph do
   @spec count_connections(t) :: non_neg_integer
   def count_connections(%Graph{connections: connections}) do
     connections
-    |> Map.keys
+    |> Map.values
+    |> List.flatten
     |> Enum.count
   end
 
