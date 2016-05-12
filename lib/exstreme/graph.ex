@@ -3,7 +3,7 @@ defmodule Exstreme.Graph do
   """
   alias __MODULE__
 
-  @type t :: %Graph{params: [key: term], nodes: %{key: atom}, connections: %{key: atom}}
+  @type t :: %Graph{params: [key: term], nodes: %{key: [key: term]}, connections: %{key: atom}}
   defstruct params: [], nodes: %{}, connections: %{}
 
   @doc """
