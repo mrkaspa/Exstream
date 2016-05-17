@@ -16,4 +16,8 @@ defmodule Exstreme.GraphTest do
   test "the start node is n1" do
     assert Graph.find_start_node(graph_many_nodes) == [:n1]
   end
+
+  test "" do
+    assert Graph.get_before_nodes(graph_many_nodes, :f1) == [:n3, :n4]
+  end
 end

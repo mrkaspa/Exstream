@@ -1,8 +1,9 @@
 defmodule Exstreme.GNode.Common do
   use Exstreme.GNode.Behaviour
 
-  def handle_cast({:next, {_, msg} }, stats) do
-    {:ok, result} = stats.func.(msg)
-    send_next(stats.next, result)
+  def handle_cast({:next, _, msg}, data) do
+    {:ok, result} = data.func.(msg, data)
+    send_next(self, data.next, result)
+    {:noreply, data}
   end
 end

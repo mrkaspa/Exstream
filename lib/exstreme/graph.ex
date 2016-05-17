@@ -50,6 +50,28 @@ defmodule Exstreme.Graph do
     |> Enum.filter(is_first?)
   end
 
+  @spec get_before_nodes(t, atom) :: [atom]
+  def get_before_nodes(%Graph{connections: connections}, node) do
+    compare_func =
+      fn(current_node, {_from, to}) ->
+        current_node == to
+      end
+    Enum.reduce(connections, [], fn(connection, res) ->
+      res ++ get_nodes_func(node, connection, res, compare_func)
+    end)
+  end
+
+  @spec get_after_nodes(t, atom) :: [atom]
+  def get_after_nodes(%Graph{nodes: nodes, connections: connections}, node) do
+    compare_func =
+      fn(current_node, {from, _to}) ->
+        current_node == from
+      end
+    Enum.reduce(connections, [], fn(connection, res) ->
+      res ++ get_nodes_func(node, connection, res, compare_func)
+    end)
+  end
+
   # private
 
   @spec map_to_connections(t) :: [atom]
@@ -80,5 +102,21 @@ defmodule Exstreme.Graph do
     |> Map.values
     |> List.flatten
     |> Enum.member?(node)
+  end
+
+  @spec get_nodes_func(atom, {atom, atom}, [atom], ((atom, {atom, atom}) -> boolean)) :: [atom]
+  defp get_nodes_func(node, pair = {from, to}, res, func) do
+    case to do
+      to when is_atom(to) ->
+        if func.(node, pair) do
+          [res | node]
+        else
+          res
+        end
+      to when is_list(to) ->
+        Enum.map(to, fn(current_to) ->
+          get_nodes_func(node, {from, current_to}, res, func)
+        end)
+    end
   end
 end
