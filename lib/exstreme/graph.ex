@@ -50,26 +50,40 @@ defmodule Exstreme.Graph do
     |> Enum.filter(is_first?)
   end
 
+  @doc """
+  """
+  @spec find_last_node(t) :: [atom]
+  def find_last_node(%Graph{nodes: nodes, connections: connections}) do
+    is_last? =
+      fn(node) ->
+        not(at_first?(connections, node)) and at_last?(connections, node)
+      end
+
+    nodes
+    |> Map.keys
+    |> Enum.filter(is_last?)
+  end
+
   @spec get_before_nodes(t, atom) :: [atom]
   def get_before_nodes(%Graph{connections: connections}, node) do
     compare_func =
-      fn(current_node, {_from, to}) ->
-        current_node == to
+      fn(current_node, {from, to}) ->
+        {current_node == to, from}
       end
     Enum.reduce(connections, [], fn(connection, res) ->
-      res ++ get_nodes_func(node, connection, res, compare_func)
-    end)
+      List.flatten(get_nodes_func(node, connection, res, compare_func), res)
+    end) |> Enum.uniq
   end
 
   @spec get_after_nodes(t, atom) :: [atom]
   def get_after_nodes(%Graph{nodes: nodes, connections: connections}, node) do
     compare_func =
-      fn(current_node, {from, _to}) ->
-        current_node == from
+      fn(current_node, {from, to}) ->
+        {current_node == from, to}
       end
     Enum.reduce(connections, [], fn(connection, res) ->
       res ++ get_nodes_func(node, connection, res, compare_func)
-    end)
+    end) |> Enum.uniq
   end
 
   # private
@@ -108,14 +122,15 @@ defmodule Exstreme.Graph do
   defp get_nodes_func(node, pair = {from, to}, res, func) do
     case to do
       to when is_atom(to) ->
-        if func.(node, pair) do
-          [res | node]
+        {ok, add_node} = func.(node, pair)
+        if ok do
+          [add_node | res]
         else
           res
         end
       to when is_list(to) ->
-        Enum.map(to, fn(current_to) ->
-          get_nodes_func(node, {from, current_to}, res, func)
+        Enum.reduce(to, res, fn(current_to, new_res) ->
+          List.flatten(get_nodes_func(node, {from, current_to}, new_res, func), new_res)
         end)
     end
   end

@@ -17,7 +17,17 @@ defmodule Exstreme.GraphTest do
     assert Graph.find_start_node(graph_many_nodes) == [:n1]
   end
 
-  test "" do
-    assert Graph.get_before_nodes(graph_many_nodes, :f1) == [:n3, :n4]
+  test "the last node is n5" do
+    assert Graph.find_last_node(graph_many_nodes) == [:n5]
+  end
+
+  test "the nodes before f1 are n4 and n3" do
+    res = Graph.get_before_nodes(graph_many_nodes, :f1)
+    assert res == [:n4, :n3]
+  end
+
+  test "the nodes after f1 are n4 and n3" do
+    res = Graph.get_after_nodes(graph_many_nodes, :f1)
+    assert res == [:n5]
   end
 end

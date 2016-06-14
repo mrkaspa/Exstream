@@ -7,7 +7,7 @@ defmodule Exstreme.GraphCreatorTest do
 
   test "creates a valid graph struct" do
     compare_graph = %Graph{
-      nodes: %{n1: [], n2: []},
+      nodes: %{n1: params, n2: params},
       connections: %{n1: :n2}
     }
     assert create_graph == compare_graph
@@ -36,7 +36,7 @@ defmodule Exstreme.GraphCreatorTest do
 
   test "can create n3 and add a relation between n2 and n3" do
     compare_graph = %Graph{
-      nodes: %{n1: [], n2: [], n3: []},
+      nodes: %{n1: params, n2: params, n3: params},
       connections: %{n1: :n2, n2: :n3}
     }
 
@@ -48,11 +48,11 @@ defmodule Exstreme.GraphCreatorTest do
 
   test "can add a broadcast an many nodes to the broadcast" do
     compare_graph = %Graph{
-      nodes: %{n1: [], n2: [], b1: [], n3: [], n4: []},
+      nodes: %{n1: params, n2: params, b1: params_broadcast, n3: params, n4: params},
       connections: %{n1: :n2, n2: :b1, b1: [:n4, :n3]}
     }
 
-    {graph, b1} = GraphCreator.create_broadcast(create_graph, params)
+    {graph, b1} = GraphCreator.create_broadcast(create_graph, params_broadcast)
     {graph, n3} = GraphCreator.create_node(graph, params)
     {graph, n4} = GraphCreator.create_node(graph, params)
 
@@ -67,14 +67,14 @@ defmodule Exstreme.GraphCreatorTest do
 
   test "can add a funnel" do
     compare_graph = %Graph{
-      nodes: %{n1: [], n2: [], b1: [], n3: [], n4: [], f1: [], n5: []},
+      nodes: %{n1: params, n2: params, b1: params_broadcast, n3: params, n4: params, f1: params_funnel, n5: params},
       connections: %{n1: :n2, n2: :b1, b1: [:n4, :n3], n3: :f1, n4: :f1, f1: :n5}
     }
 
-    {graph, b1} = GraphCreator.create_broadcast(create_graph, params)
+    {graph, b1} = GraphCreator.create_broadcast(create_graph, params_broadcast)
     {graph, n3} = GraphCreator.create_node(graph, params)
     {graph, n4} = GraphCreator.create_node(graph, params)
-    {graph, f1} = GraphCreator.create_funnel(graph, params)
+    {graph, f1} = GraphCreator.create_funnel(graph, params_funnel)
     {graph, n5} = GraphCreator.create_node(graph, params)
 
     new_graph =

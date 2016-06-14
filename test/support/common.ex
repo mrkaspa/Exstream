@@ -5,13 +5,13 @@ defmodule Exstreme.Common do
   using do
     quote do
       def graph_many_nodes do
-        graph = GraphCreator.create_graph(params)
+        graph = GraphCreator.create_graph([])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
-        {graph, b1} = GraphCreator.create_broadcast(graph, params)
+        {graph, b1} = GraphCreator.create_broadcast(graph, params_broadcast)
         {graph, n3} = GraphCreator.create_node(graph, params)
         {graph, n4} = GraphCreator.create_node(graph, params)
-        {graph, f1} = GraphCreator.create_funnel(graph, params)
+        {graph, f1} = GraphCreator.create_funnel(graph, params_funnel)
         {graph, n5} = GraphCreator.create_node(graph, params)
 
         graph
@@ -27,29 +27,29 @@ defmodule Exstreme.Common do
       # invalid graphs
 
       def graph_one_node_no_connections do
-        graph = GraphCreator.create_graph(params)
+        graph = GraphCreator.create_graph([])
         {graph, _n1} = GraphCreator.create_node(graph, params)
         graph
       end
 
-      def graph_no_connections, do: GraphCreator.create_graph(params)
+      def graph_no_connections, do: GraphCreator.create_graph([])
 
       def graph_start_with_broadcast do
-        graph = GraphCreator.create_graph(params)
-        {graph, b1} = GraphCreator.create_broadcast(graph, params)
+        graph = GraphCreator.create_graph([])
+        {graph, b1} = GraphCreator.create_broadcast(graph, params_broadcast)
         {graph, n1} = GraphCreator.create_node(graph, params)
         GraphCreator.add_connection(graph, b1, n1)
       end
 
       def graph_start_with_funnnel do
-        graph = GraphCreator.create_graph(params)
-        {graph, f1} = GraphCreator.create_funnel(graph, params)
+        graph = GraphCreator.create_graph([])
+        {graph, f1} = GraphCreator.create_funnel(graph, params_funnel)
         {graph, n1} = GraphCreator.create_node(graph, params)
         GraphCreator.add_connection(graph, f1, n1)
       end
 
       def graph_unconnected_nodes do
-        graph = GraphCreator.create_graph(params)
+        graph = GraphCreator.create_graph([])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
         {graph, _n3} = GraphCreator.create_node(graph, params)
@@ -57,13 +57,17 @@ defmodule Exstreme.Common do
       end
 
       defp create_graph do
-        graph = GraphCreator.create_graph(params)
+        graph = GraphCreator.create_graph([])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
         GraphCreator.add_connection(graph, n1, n2)
       end
 
-      def params, do: []
+      def params, do: [type: :common, func: fn({:sum, acc}, _) -> {:ok, {:sum, acc + 1}} end]
+
+      def params_funnel, do: [type: :funnel, func: fn(values, _) -> {:ok, {:sum, Enum.reduce(values, 0, fn({:sum, num}, acc) -> num + acc end)}} end]
+
+      def params_broadcast, do: [type: :broadcast]
     end
   end
 end

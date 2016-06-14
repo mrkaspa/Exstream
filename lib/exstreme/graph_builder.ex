@@ -42,8 +42,9 @@ defmodule Exstreme.GraphBuilder do
     end)
   end
 
-  @spec start_node({atom, [key: any]}) :: {atom, [key: any]}
-  defp start_node({node, params = [type: type]}) do
+  @spec start_node({atom, [term: any]}) :: {atom, [key: any]}
+  defp start_node({node, params}) do
+    type = Keyword.get(params, :type)
     params = Keyword.put(params, :nid, node)
     {:ok, pid} =
       case type do
@@ -69,8 +70,8 @@ defmodule Exstreme.GraphBuilder do
 
   @spec connect_pair({atom, atom}, %{key: [key: term]}) :: no_return
   defp connect_pair({from, to}, nodes) when is_atom(to) do
-    [pid: pid_from] = nodes[from]
-    [pid: pid_to] = nodes[to]
+    pid_from = Keyword.get(nodes[from], :pid)
+    pid_to =  Keyword.get(nodes[to], :pid)
     GenServer.cast(pid_from, {:connect, pid_to})
   end
 end
