@@ -5,15 +5,19 @@ defmodule Exstreme.GraphBuilder do
   alias Exstreme.GNode.Funnel
   alias Exstreme.GNode.Common
   alias Exstreme.Graph
+  alias Exstreme.GraphValidator
 
   @doc """
+  Builds the Supervision tree for the graph
   """
-  @spec build(Graph.t) :: Graph.t
+  @spec build(Graph.t) :: Graph.t | GraphValidator.error
   def build(graph) do
-    graph
-    |> update_nodes_relations
-    |> start_nodes
-    |> connect_nodes
+    with :ok <- GraphValidator.validate(graph) do
+      graph
+      |> update_nodes_relations
+      |> start_nodes
+      |> connect_nodes
+    end
   end
 
   #private

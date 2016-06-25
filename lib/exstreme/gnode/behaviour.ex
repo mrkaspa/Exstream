@@ -19,8 +19,9 @@ defmodule Exstreme.GNode.Behaviour do
         #TODO use counters
       end
 
-      def start_link(opts \\ []) do
-        GenServer.start_link(__MODULE__, opts)
+      def start_link(params \\ []) do
+        nid = Keyword.get(params, :nid)
+        GenServer.start_link(__MODULE__, params, name: nid)
       end
 
       def init(params) do

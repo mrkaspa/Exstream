@@ -3,18 +3,34 @@ defmodule Exstreme.GraphCreator do
   """
   alias Exstreme.Graph
 
+  @default_length_name 20
+
+  @typedoc """
+  
+  """
   @type update_map_func :: (%{key: atom} -> %{key: atom})
 
   @doc """
   """
   @spec create_graph([key: term]) :: Graph.t
-  def create_graph(params \\ []), do: %Graph{params: params}
+  def create_graph(params) do
+    name =
+        :crypto.strong_rand_bytes(@default_length_name)
+        |> Base.url_encode64
+        |> binary_part(0, @default_length_name)
+    create_graph(name, params)
+  end
+
+  @doc """
+  """
+  @spec create_graph(String.t, [key: term]) :: Graph.t
+  def create_graph(name, params), do: %Graph{name: name, params: params}
 
   @doc """
   """
   @spec create_node(Graph.t, [key: term]) :: {Graph.t, atom}
-  def create_node(graph = %Graph{nodes: nodes}, params \\ []) do
-    key = next_node_key(nodes)
+  def create_node(graph = %Graph{name: name, nodes: nodes}, params \\ []) do
+    key = next_node_key(name, nodes)
 
     new_graph = update_in(graph.nodes, &(Map.put(&1, key, params)))
     {new_graph, key}
@@ -23,8 +39,8 @@ defmodule Exstreme.GraphCreator do
   @doc """
   """
   @spec create_broadcast(Graph.t, [key: term]) :: {Graph.t, atom}
-  def create_broadcast(graph = %Graph{nodes: nodes}, params \\ []) do
-    key = next_broadcast_key(nodes)
+  def create_broadcast(graph = %Graph{name: name, nodes: nodes}, params \\ []) do
+    key = next_broadcast_key(name, nodes)
 
     new_graph = update_in(graph.nodes, &(Map.put(&1, key, params)))
     {new_graph, key}
@@ -33,8 +49,8 @@ defmodule Exstreme.GraphCreator do
   @doc """
   """
   @spec create_funnel(Graph.t, [key: term]) :: {Graph.t, atom}
-  def create_funnel(graph = %Graph{nodes: nodes}, params \\ []) do
-    key = next_funnel_key(nodes)
+  def create_funnel(graph = %Graph{name: name, nodes: nodes}, params \\ []) do
+    key = next_funnel_key(name, nodes)
 
     new_graph = update_in(graph.nodes, &(Map.put(&1, key, params)))
     {new_graph, key}
@@ -153,29 +169,30 @@ defmodule Exstreme.GraphCreator do
     end
   end
 
-  @spec next_node_key(%{key: atom}) :: atom
-  defp next_node_key(nodes) do
-    next_key(nodes, "n")
+  @spec next_node_key(String.t, %{key: atom}) :: atom
+  defp next_node_key(name, nodes) do
+    next_key(name, nodes, "n")
   end
 
-  @spec next_broadcast_key(%{key: atom}) :: atom
-  defp next_broadcast_key(nodes) do
-    next_key(nodes, "b")
+  @spec next_broadcast_key(String.t, %{key: atom}) :: atom
+  defp next_broadcast_key(name, nodes) do
+    next_key(name, nodes, "b")
   end
 
-  @spec next_funnel_key(%{key: atom}) :: atom
-  defp next_funnel_key(nodes) do
-    next_key(nodes, "f")
+  @spec next_funnel_key(String.t, %{key: atom}) :: atom
+  defp next_funnel_key(name, nodes) do
+    next_key(name, nodes, "f")
   end
 
-  @spec next_key(%{key: atom}, String.t) :: atom
-  defp next_key(map, letter) do
+  @spec next_key(String.t, %{key: atom}, String.t) :: atom
+  defp next_key(name, map, letter) do
+    prefix = "#{letter}_#{name}_"
     count =
       map
       |> Map.keys
       |> Enum.map(&Atom.to_string/1)
-      |> Enum.filter(fn(str) -> String.starts_with?(str, letter) end)
+      |> Enum.filter(&(String.starts_with?(&1, prefix)))
       |> Enum.count
-    String.to_atom("#{letter}#{count + 1}")
+    String.to_atom("#{prefix}#{count + 1}")
   end
 end

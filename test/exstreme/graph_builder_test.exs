@@ -5,7 +5,7 @@ defmodule Exstreme.GraphBuilderTest do
   alias Exstreme.Graph
   doctest Exstreme.GraphBuilder
 
-  test "creates a graph" do
+  test "creates a graph and check built params" do
     graph_built = GraphBuilder.build(create_graph)
     assert graph_built != create_graph
     Enum.each(graph_built.nodes, fn({_, params}) ->

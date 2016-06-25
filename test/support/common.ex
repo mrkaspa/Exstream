@@ -4,8 +4,10 @@ defmodule Exstreme.Common do
 
   using do
     quote do
+      def graph_name, do: "demo"
+
       def graph_many_nodes do
-        graph = GraphCreator.create_graph([])
+        graph = GraphCreator.create_graph(graph_name, [])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
         {graph, b1} = GraphCreator.create_broadcast(graph, params_broadcast)
@@ -27,29 +29,29 @@ defmodule Exstreme.Common do
       # invalid graphs
 
       def graph_one_node_no_connections do
-        graph = GraphCreator.create_graph([])
+        graph = GraphCreator.create_graph(graph_name, [])
         {graph, _n1} = GraphCreator.create_node(graph, params)
         graph
       end
 
-      def graph_no_connections, do: GraphCreator.create_graph([])
+      def graph_no_connections, do: GraphCreator.create_graph(graph_name, [])
 
       def graph_start_with_broadcast do
-        graph = GraphCreator.create_graph([])
+        graph = GraphCreator.create_graph(graph_name, [])
         {graph, b1} = GraphCreator.create_broadcast(graph, params_broadcast)
         {graph, n1} = GraphCreator.create_node(graph, params)
         GraphCreator.add_connection(graph, b1, n1)
       end
 
       def graph_start_with_funnnel do
-        graph = GraphCreator.create_graph([])
+        graph = GraphCreator.create_graph(graph_name, [])
         {graph, f1} = GraphCreator.create_funnel(graph, params_funnel)
         {graph, n1} = GraphCreator.create_node(graph, params)
         GraphCreator.add_connection(graph, f1, n1)
       end
 
       def graph_unconnected_nodes do
-        graph = GraphCreator.create_graph([])
+        graph = GraphCreator.create_graph(graph_name, [])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
         {graph, _n3} = GraphCreator.create_node(graph, params)
@@ -57,7 +59,7 @@ defmodule Exstreme.Common do
       end
 
       defp create_graph do
-        graph = GraphCreator.create_graph([])
+        graph = GraphCreator.create_graph(graph_name, [])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
         GraphCreator.add_connection(graph, n1, n2)

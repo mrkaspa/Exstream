@@ -1,0 +1,6 @@
+- Validate before build
+- Add Supervisors functionality
+- Named nodes with graph prefix
+- Improve test
+- Improve API
+- Update to GenStage

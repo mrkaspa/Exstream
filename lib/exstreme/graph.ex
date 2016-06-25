@@ -3,8 +3,10 @@ defmodule Exstreme.Graph do
   """
   alias __MODULE__
 
-  @type t :: %Graph{params: [key: term], nodes: %{key: [key: term]}, connections: %{key: atom}}
-  defstruct params: [], nodes: %{}, connections: %{}
+  @typedoc """
+  """
+  @type t :: %Graph{name: String.t,params: [key: term], nodes: %{key: [key: term]}, connections: %{key: atom}}
+  defstruct name: '', params: [], nodes: %{}, connections: %{}
 
   @doc """
   """
@@ -119,7 +121,7 @@ defmodule Exstreme.Graph do
   end
 
   @spec get_nodes_func(atom, {atom, atom}, [atom], ((atom, {atom, atom}) -> boolean)) :: [atom]
-  defp get_nodes_func(node, pair = {from, to}, res, func) do
+  defp get_nodes_func(node, {from, to} = pair, res, func) do
     case to do
       to when is_atom(to) ->
         {ok, add_node} = func.(node, pair)
