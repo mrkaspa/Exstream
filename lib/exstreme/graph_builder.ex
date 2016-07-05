@@ -1,5 +1,6 @@
 defmodule Exstreme.GraphBuilder do
   @moduledoc """
+  Builds the Graph into a Supervision tree of process
   """
   alias Exstreme.GNode.Broadcast
   alias Exstreme.GNode.Funnel
@@ -22,6 +23,7 @@ defmodule Exstreme.GraphBuilder do
 
   #private
 
+  # Returns a Graph with the before_nodes and after_nodes set
   @spec update_nodes_relations(Graph.t) :: Graph.t
   defp update_nodes_relations(graph) do
     update_node_func =
@@ -37,6 +39,7 @@ defmodule Exstreme.GraphBuilder do
     update_in(graph.nodes, &(&1 |> Enum.map(update_node_func) |> Map.new))
   end
 
+  # Starts all the nodes
   @spec start_nodes(Graph.t) :: Graph.t
   defp start_nodes(graph) do
     update_in(graph.nodes, fn(nodes) ->
@@ -46,25 +49,31 @@ defmodule Exstreme.GraphBuilder do
     end)
   end
 
+  # Starts a node
   @spec start_node({atom, [term: any]}) :: {atom, [key: any]}
   defp start_node({node, params}) do
     type = Keyword.get(params, :type)
-    params = Keyword.put(params, :nid, node)
-    {:ok, pid} =
+    params =
+      params
+      |> Keyword.put(:nid, node)
+      |> Keyword.put_new(:func, fn(data, _) -> {:ok, data} end)
+    {:ok, _} =
       case type do
         :broadcast -> Broadcast.start_link(params)
         :funnel -> Funnel.start_link(params)
         _ -> Common.start_link(params)
       end
-    {node, Keyword.put(params, :pid, pid)}
+    {node, params}
   end
 
+  # Connects all nodes
   @spec connect_nodes(Graph.t) :: Graph.t
   defp connect_nodes(graph = %Graph{nodes: nodes, connections: connections}) do
     Enum.each(connections, &(connect_pair(&1, nodes)))
     graph
   end
 
+  # Connects two nodes
   @spec connect_pair({atom, [atom]}, %{key: [key: term]}) :: no_return
   defp connect_pair({from, to}, nodes) when is_list(to) do
     Enum.map(1..Enum.count(to), fn(_) -> from end)
@@ -72,10 +81,11 @@ defmodule Exstreme.GraphBuilder do
     |> Enum.each(&(connect_pair(&1, nodes)))
   end
 
+  # Connects two nodes
   @spec connect_pair({atom, atom}, %{key: [key: term]}) :: no_return
   defp connect_pair({from, to}, nodes) when is_atom(to) do
-    pid_from = Keyword.get(nodes[from], :pid)
-    pid_to =  Keyword.get(nodes[to], :pid)
-    GenServer.cast(pid_from, {:connect, pid_to})
+    nid_from = Keyword.get(nodes[from], :nid)
+    nid_to =  Keyword.get(nodes[to], :nid)
+    GenServer.cast(nid_from, {:connect, nid_to})
   end
 end

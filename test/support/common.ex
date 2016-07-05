@@ -65,9 +65,16 @@ defmodule Exstreme.Common do
         GraphCreator.add_connection(graph, n1, n2)
       end
 
+      def funnel_func(values, _) do
+        reduced = Enum.reduce(values, 0, fn({:sum, num}, acc) ->
+          num + acc
+        end)
+        {:ok, {:sum, reduced}}
+      end
+
       def params, do: [type: :common, func: fn({:sum, acc}, _) -> {:ok, {:sum, acc + 1}} end]
 
-      def params_funnel, do: [type: :funnel, func: fn(values, _) -> {:ok, {:sum, Enum.reduce(values, 0, fn({:sum, num}, acc) -> num + acc end)}} end]
+      def params_funnel, do: [type: :funnel, func: &funnel_func/2]
 
       def params_broadcast, do: [type: :broadcast]
     end

@@ -1,14 +1,17 @@
 defmodule Exstreme.Graph do
   @moduledoc """
+  Provides information for a Graph
   """
   alias __MODULE__
 
   @typedoc """
+  Represents the Graph data
   """
   @type t :: %Graph{name: String.t,params: [key: term], nodes: %{key: [key: term]}, connections: %{key: atom}}
   defstruct name: '', params: [], nodes: %{}, connections: %{}
 
   @doc """
+  Counts the Graph nodes
   """
   @spec count_nodes(t) :: non_neg_integer
   def count_nodes(%Graph{nodes: nodes}) do
@@ -18,6 +21,7 @@ defmodule Exstreme.Graph do
   end
 
   @doc """
+  Counts the connections
   """
   @spec count_connections(t) :: non_neg_integer
   def count_connections(%Graph{connections: connections}) do
@@ -28,6 +32,7 @@ defmodule Exstreme.Graph do
   end
 
   @doc """
+  Counts the connected, unconnected, begin and end nodes
   """
   @spec connections_stats(t) :: %{key: integer}
   def connections_stats(graph) do
@@ -39,6 +44,7 @@ defmodule Exstreme.Graph do
   end
 
   @doc """
+  Gets the starting node
   """
   @spec find_start_node(t) :: [atom]
   def find_start_node(%Graph{nodes: nodes, connections: connections}) do
@@ -53,6 +59,7 @@ defmodule Exstreme.Graph do
   end
 
   @doc """
+  Gets the last nodes
   """
   @spec find_last_node(t) :: [atom]
   def find_last_node(%Graph{nodes: nodes, connections: connections}) do
@@ -66,6 +73,9 @@ defmodule Exstreme.Graph do
     |> Enum.filter(is_last?)
   end
 
+  @doc """
+  Gets the nodes before the current one
+  """
   @spec get_before_nodes(t, atom) :: [atom]
   def get_before_nodes(%Graph{connections: connections}, node) do
     compare_func =
@@ -77,8 +87,11 @@ defmodule Exstreme.Graph do
     end) |> Enum.uniq
   end
 
+  @doc """
+  Gets the nodes after the current one
+  """
   @spec get_after_nodes(t, atom) :: [atom]
-  def get_after_nodes(%Graph{nodes: nodes, connections: connections}, node) do
+  def get_after_nodes(%Graph{connections: connections}, node) do
     compare_func =
       fn(current_node, {from, to}) ->
         {current_node == from, to}
@@ -88,8 +101,21 @@ defmodule Exstreme.Graph do
     end) |> Enum.uniq
   end
 
+  @doc """
+  Gets the name in the Graph for one node
+  """
+  @spec nid(t, atom) :: atom
+  def nid(%Graph{name: name}, node) do
+    [char, rest] =
+      node
+      |> Atom.to_string
+      |> String.codepoints
+    String.to_atom("#{char}_#{name}_#{rest}")
+  end
+
   # private
 
+  # Map the connections to the kind of connection
   @spec map_to_connections(t) :: [atom]
   defp map_to_connections(%Graph{nodes: nodes, connections: connections}) do
     to_connections =
@@ -107,11 +133,13 @@ defmodule Exstreme.Graph do
     |> Enum.map(to_connections)
   end
 
+  # Checks if a node is the first position of a connection
   @spec at_first?(%{key: atom}, atom) :: boolean
-  defp at_first?(connections,  node) do
+  defp at_first?(connections, node) do
     Map.has_key?(connections, node)
   end
 
+  # Checks if a node is the last position of a connection
   @spec at_last?(%{key: atom}, atom) :: boolean
   defp at_last?(connections,  node) do
     connections
