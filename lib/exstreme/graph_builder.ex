@@ -27,13 +27,13 @@ defmodule Exstreme.GraphBuilder do
   @spec update_nodes_relations(Graph.t) :: Graph.t
   defp update_nodes_relations(graph) do
     update_node_func =
-      fn({node, params}) ->
+      fn({gnode, params}) ->
         new_params =
           params
-          |> Keyword.put(:before_nodes, Graph.get_before_nodes(graph, node))
-          |> Keyword.put(:after_nodes, Graph.get_after_nodes(graph, node))
+          |> Keyword.put(:before_nodes, Graph.get_before_nodes(graph, gnode))
+          |> Keyword.put(:after_nodes, Graph.get_after_nodes(graph, gnode))
 
-        {node, new_params}
+        {gnode, new_params}
       end
 
     update_in(graph.nodes, &(&1 |> Enum.map(update_node_func) |> Map.new))
@@ -49,13 +49,13 @@ defmodule Exstreme.GraphBuilder do
     end)
   end
 
-  # Starts a node
+  # Starts a gnode
   @spec start_node({atom, [term: any]}) :: {atom, [key: any]}
-  defp start_node({node, params}) do
+  defp start_node({gnode, params}) do
     type = Keyword.get(params, :type)
     params =
       params
-      |> Keyword.put(:nid, node)
+      |> Keyword.put(:nid, gnode)
       |> Keyword.put_new(:func, fn(data, _) -> {:ok, data} end)
     {:ok, _} =
       case type do
@@ -63,7 +63,7 @@ defmodule Exstreme.GraphBuilder do
         :funnel -> Funnel.start_link(params)
         _ -> Common.start_link(params)
       end
-    {node, params}
+    {gnode, params}
   end
 
   # Connects all nodes
@@ -76,7 +76,8 @@ defmodule Exstreme.GraphBuilder do
   # Connects two nodes
   @spec connect_pair({atom, [atom]}, %{key: [key: term]}) :: no_return
   defp connect_pair({from, to}, nodes) when is_list(to) do
-    Enum.map(1..Enum.count(to), fn(_) -> from end)
+    1..Enum.count(to)
+    |> Enum.map(fn(_) -> from end)
     |> Enum.zip(to)
     |> Enum.each(&(connect_pair(&1, nodes)))
   end

@@ -20,11 +20,11 @@ defmodule Exstreme.GraphTest do
     assert Graph.connections_stats(graph) == %{begin: 1, connected: 5, end: 1}
   end
 
-  test "the start node is n1", %{graph: graph, n1: n1} do
+  test "the start gnode is n1", %{graph: graph, n1: n1} do
     assert Graph.find_start_node(graph) == [n1]
   end
 
-  test "the last node is n5", %{graph: graph, n5: n5} do
+  test "the last gnode is n5", %{graph: graph, n5: n5} do
     assert Graph.find_last_node(graph) == [n5]
   end
 

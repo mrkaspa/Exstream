@@ -44,13 +44,13 @@ defmodule Exstreme.Graph do
   end
 
   @doc """
-  Gets the starting node
+  Gets the starting gnode
   """
   @spec find_start_node(t) :: [atom]
   def find_start_node(%Graph{nodes: nodes, connections: connections}) do
     is_first? =
-      fn(node) ->
-        at_first?(connections, node) and not(at_last?(connections, node))
+      fn(gnode) ->
+        at_first?(connections, gnode) and not(at_last?(connections, gnode))
       end
 
     nodes
@@ -64,8 +64,8 @@ defmodule Exstreme.Graph do
   @spec find_last_node(t) :: [atom]
   def find_last_node(%Graph{nodes: nodes, connections: connections}) do
     is_last? =
-      fn(node) ->
-        not(at_first?(connections, node)) and at_last?(connections, node)
+      fn(gnode) ->
+        not(at_first?(connections, gnode)) and at_last?(connections, gnode)
       end
 
     nodes
@@ -77,37 +77,43 @@ defmodule Exstreme.Graph do
   Gets the nodes before the current one
   """
   @spec get_before_nodes(t, atom) :: [atom]
-  def get_before_nodes(%Graph{connections: connections}, node) do
+  def get_before_nodes(%Graph{connections: connections}, gnode) do
     compare_func =
       fn(current_node, {from, to}) ->
         {current_node == to, from}
       end
-    Enum.reduce(connections, [], fn(connection, res) ->
-      List.flatten(get_nodes_func(node, connection, res, compare_func), res)
-    end) |> Enum.uniq
+
+    connections
+    |> Enum.reduce([], fn(connection, res) ->
+        List.flatten(get_nodes_func(gnode, connection, res, compare_func), res)
+      end)
+    |> Enum.uniq
   end
 
   @doc """
   Gets the nodes after the current one
   """
   @spec get_after_nodes(t, atom) :: [atom]
-  def get_after_nodes(%Graph{connections: connections}, node) do
+  def get_after_nodes(%Graph{connections: connections}, gnode) do
     compare_func =
       fn(current_node, {from, to}) ->
         {current_node == from, to}
       end
-    Enum.reduce(connections, [], fn(connection, res) ->
-      res ++ get_nodes_func(node, connection, res, compare_func)
-    end) |> Enum.uniq
+
+    connections
+    |> Enum.reduce([], fn(connection, res) ->
+        res ++ get_nodes_func(gnode, connection, res, compare_func)
+      end)
+    |> Enum.uniq
   end
 
   @doc """
-  Gets the name in the Graph for one node
+  Gets the name in the Graph for one gnode
   """
   @spec nid(t, atom) :: atom
-  def nid(%Graph{name: name}, node) do
+  def nid(%Graph{name: name}, gnode) do
     [char, rest] =
-      node
+      gnode
       |> Atom.to_string
       |> String.codepoints
     String.to_atom("#{char}_#{name}_#{rest}")
@@ -119,8 +125,8 @@ defmodule Exstreme.Graph do
   @spec map_to_connections(t) :: [atom]
   defp map_to_connections(%Graph{nodes: nodes, connections: connections}) do
     to_connections =
-      fn(node) ->
-        case {at_first?(connections, node), at_last?(connections, node)} do
+      fn(gnode) ->
+        case {at_first?(connections, gnode), at_last?(connections, gnode)} do
           {true, true}   -> :connected
           {true, false}  -> :begin
           {false, true}  -> :end
@@ -133,26 +139,26 @@ defmodule Exstreme.Graph do
     |> Enum.map(to_connections)
   end
 
-  # Checks if a node is the first position of a connection
+  # Checks if a gnode is the first position of a connection
   @spec at_first?(%{key: atom}, atom) :: boolean
-  defp at_first?(connections, node) do
-    Map.has_key?(connections, node)
+  defp at_first?(connections, gnode) do
+    Map.has_key?(connections, gnode)
   end
 
-  # Checks if a node is the last position of a connection
+  # Checks if a gnode is the last position of a connection
   @spec at_last?(%{key: atom}, atom) :: boolean
-  defp at_last?(connections,  node) do
+  defp at_last?(connections,  gnode) do
     connections
     |> Map.values
     |> List.flatten
-    |> Enum.member?(node)
+    |> Enum.member?(gnode)
   end
 
   @spec get_nodes_func(atom, {atom, atom}, [atom], ((atom, {atom, atom}) -> boolean)) :: [atom]
-  defp get_nodes_func(node, {from, to} = pair, res, func) do
+  defp get_nodes_func(gnode, {from, to} = pair, res, func) do
     case to do
       to when is_atom(to) ->
-        {ok, add_node} = func.(node, pair)
+        {ok, add_node} = func.(gnode, pair)
         if ok do
           [add_node | res]
         else
@@ -160,7 +166,7 @@ defmodule Exstreme.Graph do
         end
       to when is_list(to) ->
         Enum.reduce(to, res, fn(current_to, new_res) ->
-          List.flatten(get_nodes_func(node, {from, current_to}, new_res, func), new_res)
+          List.flatten(get_nodes_func(gnode, {from, current_to}, new_res, func), new_res)
         end)
     end
   end

@@ -32,7 +32,8 @@ defmodule Exstreme.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:dialyxir, "~> 0.3", only: [:dev]}
+      {:dialyxir, "~> 0.3", only: [:dev]},
+      {:credo, "~> 0.4", only: [:dev, :test]}
     ]
   end
 end

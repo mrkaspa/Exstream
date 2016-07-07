@@ -8,7 +8,7 @@ defmodule Exstreme.GraphValidatorTest do
     assert :ok = GraphValidator.validate(graph_many_nodes)
   end
 
-  test "the graph with one node must be invalid" do
+  test "the graph with one gnode must be invalid" do
     assert {:error, _} = GraphValidator.validate(graph_one_node_no_connections)
   end
 
@@ -16,7 +16,7 @@ defmodule Exstreme.GraphValidatorTest do
     assert {:error, _} = GraphValidator.validate(graph_no_connections)
   end
 
-  test "the graph should start in a node" do
+  test "the graph should start in a gnode" do
     assert {:error, _} = GraphValidator.validate(graph_start_with_broadcast)
     assert {:error, _} = GraphValidator.validate(graph_start_with_funnnel)
   end

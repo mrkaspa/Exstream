@@ -30,7 +30,7 @@ defmodule Exstreme.GraphCreatorTest do
     end
 
     test "throws an error when adding again a self relation", %{graph: graph, n1: n1} do
-      assert_raise ArgumentError, "You can't connect to the same node", fn ->
+      assert_raise ArgumentError, "You can't connect to the same gnode", fn ->
         graph
         |> GraphCreator.add_connection(n1, n1)
       end

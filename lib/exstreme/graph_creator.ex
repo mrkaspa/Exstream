@@ -17,7 +17,8 @@ defmodule Exstreme.GraphCreator do
   @spec create_graph([key: term]) :: Graph.t
   def create_graph(params) do
     name =
-        :crypto.strong_rand_bytes(@default_length_name)
+        @default_length_name
+        |> :crypto.strong_rand_bytes
         |> Base.url_encode64
         |> binary_part(0, @default_length_name)
     create_graph(name, params)
@@ -30,7 +31,7 @@ defmodule Exstreme.GraphCreator do
   def create_graph(name, params), do: %Graph{name: name, params: params}
 
   @doc """
-  Creates a simple node
+  Creates a simple gnode
   """
   @spec create_node(Graph.t, [key: term]) :: {Graph.t, atom}
   def create_node(graph = %Graph{nodes: nodes}, params \\ []) do
@@ -41,7 +42,7 @@ defmodule Exstreme.GraphCreator do
   end
 
   @doc """
-  Creates a broadcast node
+  Creates a broadcast gnode
   """
   @spec create_broadcast(Graph.t, [key: term]) :: {Graph.t, atom}
   def create_broadcast(graph = %Graph{nodes: nodes}, params \\ []) do
@@ -52,7 +53,7 @@ defmodule Exstreme.GraphCreator do
   end
 
   @doc """
-  Creates a funnel node
+  Creates a funnel gnode
   """
   @spec create_funnel(Graph.t, [key: term]) :: {Graph.t, atom}
   def create_funnel(graph = %Graph{nodes: nodes}, params \\ []) do
@@ -72,7 +73,7 @@ defmodule Exstreme.GraphCreator do
         update_in(graph.connections, store_connection_fn(start, finish))
       end
     else
-      raise ArgumentError, message: "You can't connect to the same node"
+      raise ArgumentError, message: "You can't connect to the same gnode"
     end
   end
 
@@ -101,7 +102,7 @@ defmodule Exstreme.GraphCreator do
     end
   end
 
-  # validations before adding a node
+  # validations before adding a gnode
 
   # Validates when a relation already exists
   @spec validate_repeated(%{key: atom}, atom, atom) :: %{key: atom}
@@ -120,52 +121,52 @@ defmodule Exstreme.GraphCreator do
     end
   end
 
-  # Validates the node position
+  # Validates the gnode position
   @spec validate_position(%{key: atom}, atom, :start | :end) :: %{key: atom}
-  defp validate_position(connections, node, position) do
-    case node |> Atom.to_string |> String.first do
-      "n" -> validate_position_node(connections, node, position)
-      "b" -> validate_position_broadcast(connections, node, position)
-      "f" -> validate_position_funnel(connections, node, position)
-       _  -> raise ArgumentError, message: "invalid node"
+  defp validate_position(connections, gnode, position) do
+    case gnode |> Atom.to_string |> String.first do
+      "n" -> validate_position_node(connections, gnode, position)
+      "b" -> validate_position_broadcast(connections, gnode, position)
+      "f" -> validate_position_funnel(connections, gnode, position)
+       _  -> raise ArgumentError, message: "invalid gnode"
     end
   end
 
-  # Validates if a normal node can be at the beginning of the relation
+  # Validates if a normal gnode can be at the beginning of the relation
   @spec validate_position_node(%{key: atom}, atom, :start) :: %{key: atom}
-  defp validate_position_node(connections, node, :start) do
-    validate_position_start(connections, node,"the node can't be twice at start position #{node}")
+  defp validate_position_node(connections, gnode, :start) do
+    validate_position_start(connections, gnode,"the gnode can't be twice at start position #{gnode}")
   end
 
-  # Validates if a normal node can be at the end of the relation
+  # Validates if a normal gnode can be at the end of the relation
   @spec validate_position_node(%{key: atom}, atom, :end) :: %{key: atom}
-  defp validate_position_node(connections, node, :end) do
-    validate_position_end(connections, node,"the node can't be twice at end position")
+  defp validate_position_node(connections, gnode, :end) do
+    validate_position_end(connections, gnode,"the gnode can't be twice at end position")
   end
 
-  # Validates if a broadcast node can be at the beginning of the relation
+  # Validates if a broadcast gnode can be at the beginning of the relation
   @spec validate_position_broadcast(%{key: atom}, atom, :start) :: %{key: atom}
   defp validate_position_broadcast(connections, _node, :start), do: connections
 
-  # Validates if a broadcast node can be at the end of the relation
+  # Validates if a broadcast gnode can be at the end of the relation
   @spec validate_position_broadcast(%{key: atom}, atom, :end) :: %{key: atom}
   defp validate_position_broadcast(connections, bct, :end) do
     validate_position_end(connections, bct, "the broadcast can't be twice at end position")
   end
 
-  # Validates if a funnel node can be at the beginning of the relation
+  # Validates if a funnel gnode can be at the beginning of the relation
   @spec validate_position_funnel(%{key: atom}, atom, :start) :: %{key: atom}
-  defp validate_position_funnel(connections, node, :start) do
-    validate_position_start(connections, node,"the funnel can't be twice at start position #{node}")
+  defp validate_position_funnel(connections, gnode, :start) do
+    validate_position_start(connections, gnode,"the funnel can't be twice at start position #{gnode}")
   end
 
-  # Validates if a funnel node can be at the normal of the relation
+  # Validates if a funnel gnode can be at the normal of the relation
   @spec validate_position_funnel(%{key: atom}, atom, :end) :: %{key: atom}
   defp validate_position_funnel(connections, _node, :end), do: connections
 
   @spec validate_position_start(%{key: atom}, atom, String.t) :: %{key: atom}
-  defp validate_position_start(connections, node, msg) do
-    exist = Map.has_key?(connections, node)
+  defp validate_position_start(connections, gnode, msg) do
+    exist = Map.has_key?(connections, gnode)
     if exist do
       raise ArgumentError, message: msg
     else
@@ -174,11 +175,11 @@ defmodule Exstreme.GraphCreator do
   end
 
   @spec validate_position_end(%{key: atom}, atom, String.t) :: %{key: atom}
-  defp validate_position_end(connections, node, msg) do
+  defp validate_position_end(connections, gnode, msg) do
     exist =
       connections
       |> Map.values
-      |> Enum.member?(node)
+      |> Enum.member?(gnode)
     if exist do
       raise ArgumentError, message: msg
     else
@@ -186,17 +187,17 @@ defmodule Exstreme.GraphCreator do
     end
   end
 
-  # Validates the node exist on the graph
+  # Validates the gnode exist on the graph
   @spec validate_node_exist(%{key: [key: term]}, atom) :: true
-  defp validate_node_exist(nodes, node) do
-    if Map.has_key?(nodes, node) do
+  defp validate_node_exist(nodes, gnode) do
+    if Map.has_key?(nodes, gnode) do
       true
     else
-      raise ArgumentError, message: "node #{node} not found"
+      raise ArgumentError, message: "gnode #{gnode} not found"
     end
   end
 
-  # Gets the next key for the node, these begin with the 'n' letter
+  # Gets the next key for the gnode, these begin with the 'n' letter
   @spec next_node_key(Graph.t, %{key: atom}) :: atom
   defp next_node_key(graph, nodes) do
     next_key(graph, nodes, "n")
