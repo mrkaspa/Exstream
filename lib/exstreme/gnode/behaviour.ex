@@ -20,8 +20,6 @@ defmodule Exstreme.GNode.Behaviour do
 
         @type t :: %Data{next: [atom], nid: atom, func: graph_func, funnel_queue: [term], received_counter: non_neg_integer, sent_counter: non_neg_integer, opts: [key: term]}
         defstruct [next: [], nid: nil, func: nil, funnel_queue: [], received_counter: 0, sent_counter: 0, opts: []]
-
-        #TODO use counters
       end
 
       def start_link(params \\ []) do
@@ -36,18 +34,23 @@ defmodule Exstreme.GNode.Behaviour do
         {:ok, %Data{func: func, nid: nid, opts: opts}}
       end
 
-      def handle_cast({:connect, to_nid}, data) do
+      def handle_cast({:next, from_data, msg}, data) do
+        send self, {:on_next, from_data, msg}
+        {:noreply, %{data | received_counter: data.received_counter + 1}}
+      end
+
+      def handle_call({:connect, to_nid}, _from, data) do
         new_data = update_in(data.next, fn(next) -> [to_nid | next] end)
-        {:noreply, new_data}
+        {:reply, :ok, new_data}
       end
 
       def handle_info({:send_next, next, msg}, data) do
         Enum.each(next, &(GenServer.cast(&1, {:next, data, msg})))
-        {:noreply, data}
+        {:noreply, %{data | sent_counter: data.sent_counter + Enum.count(next)}}
       end
 
-      def send_next(pid, next, msg) do
-        send pid, {:send_next, next, msg}
+      def send_next(next, msg) do
+        send self, {:send_next, next, msg}
       end
     end
   end

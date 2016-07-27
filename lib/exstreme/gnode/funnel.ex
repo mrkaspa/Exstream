@@ -3,7 +3,7 @@ defmodule Exstreme.GNode.Funnel do
 
   # Receives a message and saves it in a messages map queue,
   # when all the messages are done sends a the map
-  def handle_cast({:next, from_data, msg}, data) do
+  def handle_info({:on_next, from_data, msg}, data) do
     {result, new_queue} =
       data.funnel_queue
       |> add_queue(from_data.nid, msg)
@@ -20,7 +20,7 @@ defmodule Exstreme.GNode.Funnel do
     if result != nil do
       new_msg = Map.values(result)
       {:ok, result} = data.func.(new_msg, data)
-      send_next(self, data.next, result)
+      send_next(data.next, result)
     end
   end
 

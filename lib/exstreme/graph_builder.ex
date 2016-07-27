@@ -7,6 +7,7 @@ defmodule Exstreme.GraphBuilder do
   alias Exstreme.GNode.Common
   alias Exstreme.Graph
   alias Exstreme.GraphValidator
+  alias Exstreme.GraphSupervisor
 
   @doc """
   Builds the Supervision tree for the graph
@@ -16,7 +17,7 @@ defmodule Exstreme.GraphBuilder do
     with :ok <- GraphValidator.validate(graph) do
       graph
       |> update_nodes_relations
-      |> start_nodes
+      |> start_graph
       |> connect_nodes
     end
   end
@@ -36,33 +37,37 @@ defmodule Exstreme.GraphBuilder do
         {gnode, new_params}
       end
 
-    update_in(graph.nodes, &(&1 |> Enum.map(update_node_func) |> Map.new))
+    update_in(graph.nodes, &(Map.new(Enum.map(&1, update_node_func))))
   end
 
-  # Starts all the nodes
-  @spec start_nodes(Graph.t) :: Graph.t
-  defp start_nodes(graph) do
-    update_in(graph.nodes, fn(nodes) ->
+  @spec start_graph(Graph.t) :: Graph.t
+  defp start_graph(graph) do
+    graph = update_in(graph.nodes, fn(nodes) ->
       nodes
-      |> Enum.map(&start_node/1)
+      |> Enum.map(&setup_node/1)
       |> Map.new
     end)
+    case GraphSupervisor.start_link(graph) do
+      {:error, msg} ->
+        raise ArgumentError, message: msg
+      _ -> :ok
+    end
+    graph
   end
 
-  # Starts a gnode
-  @spec start_node({atom, [term: any]}) :: {atom, [key: any]}
-  defp start_node({gnode, params}) do
-    type = Keyword.get(params, :type)
+  # setup node's params
+  @spec setup_node({atom, [term: any]}) :: {atom, [key: any]}
+  defp setup_node({gnode, params}) do
+    module = case Keyword.get(params, :type) do
+      :broadcast -> Broadcast
+      :funnel -> Funnel
+      _ -> Common
+    end
     params =
       params
       |> Keyword.put(:nid, gnode)
+      |> Keyword.put(:module, module)
       |> Keyword.put_new(:func, fn(data, _) -> {:ok, data} end)
-    {:ok, _} =
-      case type do
-        :broadcast -> Broadcast.start_link(params)
-        :funnel -> Funnel.start_link(params)
-        _ -> Common.start_link(params)
-      end
     {gnode, params}
   end
 
@@ -87,6 +92,6 @@ defmodule Exstreme.GraphBuilder do
   defp connect_pair({from, to}, nodes) when is_atom(to) do
     nid_from = Keyword.get(nodes[from], :nid)
     nid_to =  Keyword.get(nodes[to], :nid)
-    GenServer.cast(nid_from, {:connect, nid_to})
+    :ok = GenServer.call(nid_from, {:connect, nid_to})
   end
 end

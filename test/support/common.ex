@@ -6,8 +6,8 @@ defmodule Exstreme.Common do
     quote do
       def graph_name, do: "demo"
 
-      def graph_many_nodes do
-        graph = GraphCreator.create_graph(graph_name, [])
+      def graph_many_nodes(name \\ nil) do
+        graph = GraphCreator.create_graph(name || graph_name, [])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
         {graph, b1} = GraphCreator.create_broadcast(graph, params_broadcast)
@@ -58,8 +58,8 @@ defmodule Exstreme.Common do
         GraphCreator.add_connection(graph, n1, n2)
       end
 
-      defp create_graph do
-        graph = GraphCreator.create_graph(graph_name, [])
+      defp create_graph(name \\ nil) do
+        graph = GraphCreator.create_graph(name || graph_name, [])
         {graph, n1} = GraphCreator.create_node(graph, params)
         {graph, n2} = GraphCreator.create_node(graph, params)
         GraphCreator.add_connection(graph, n1, n2)
