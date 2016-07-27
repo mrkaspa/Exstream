@@ -9,7 +9,7 @@ The package can be installed as:
   1. Add exstreme to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:exstreme, "~> 0.0.2"}]
+          [{:exstreme, "~> 0.0.3"}]
         end
 
   2. Check the documentation: [available in Hex](https://hexdocs.pm/exstreme/doc/Exstreme.html)

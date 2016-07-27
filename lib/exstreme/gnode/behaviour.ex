@@ -45,8 +45,9 @@ defmodule Exstreme.GNode.Behaviour do
       end
 
       def handle_info({:send_next, next, msg}, data) do
-        Enum.each(next, &(GenServer.cast(&1, {:next, data, msg})))
-        {:noreply, %{data | sent_counter: data.sent_counter + Enum.count(next)}}
+        new_data = %{data | sent_counter: data.sent_counter + Enum.count(next)}
+        Enum.each(next, &(GenServer.cast(&1, {:next, new_data, msg})))
+        {:noreply, new_data}
       end
 
       def send_next(next, msg) do
