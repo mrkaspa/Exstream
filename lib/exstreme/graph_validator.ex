@@ -1,7 +1,7 @@
 defmodule Exstreme.GraphValidator do
   alias Exstreme.Graph
   @moduledoc """
-  Validates the Graph
+  Contains the functions to validate a graph
   """
 
   @typedoc """

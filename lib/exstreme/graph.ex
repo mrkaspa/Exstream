@@ -1,6 +1,6 @@
 defmodule Exstreme.Graph do
   @moduledoc """
-  Provides information for a Graph
+  This module contains useful functions to get information about a graph.
   """
   alias __MODULE__
 

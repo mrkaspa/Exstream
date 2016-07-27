@@ -1,6 +1,6 @@
 defmodule Exstreme.GraphBuilder do
   @moduledoc """
-  Builds the Graph into a Supervision tree of process
+  Builds the graph generating a Supervision tree of process for the graph that supervises each node. 
   """
   alias Exstreme.GNode.Broadcast
   alias Exstreme.GNode.Funnel

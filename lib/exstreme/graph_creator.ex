@@ -1,6 +1,6 @@
 defmodule Exstreme.GraphCreator do
   @moduledoc """
-  Creates a Graph representation
+  Contains the functions to create graph, create nodes and to connect them.
   """
   alias Exstreme.Graph
 
@@ -36,7 +36,7 @@ defmodule Exstreme.GraphCreator do
   @spec create_node(Graph.t, [key: term]) :: {Graph.t, atom}
   def create_node(graph = %Graph{nodes: nodes}, params \\ []) do
     key = next_node_key(graph, nodes)
-
+    params = Keyword.put_new(params, :type, :common)
     new_graph = update_in(graph.nodes, &(Map.put(&1, key, params)))
     {new_graph, key}
   end
@@ -47,7 +47,7 @@ defmodule Exstreme.GraphCreator do
   @spec create_broadcast(Graph.t, [key: term]) :: {Graph.t, atom}
   def create_broadcast(graph = %Graph{nodes: nodes}, params \\ []) do
     key = next_broadcast_key(graph, nodes)
-
+    params = Keyword.put_new(params, :type, :broadcast)
     new_graph = update_in(graph.nodes, &(Map.put(&1, key, params)))
     {new_graph, key}
   end
@@ -58,7 +58,7 @@ defmodule Exstreme.GraphCreator do
   @spec create_funnel(Graph.t, [key: term]) :: {Graph.t, atom}
   def create_funnel(graph = %Graph{nodes: nodes}, params \\ []) do
     key = next_funnel_key(graph, nodes)
-
+    params = Keyword.put_new(params, :type, :funnel)
     new_graph = update_in(graph.nodes, &(Map.put(&1, key, params)))
     {new_graph, key}
   end
