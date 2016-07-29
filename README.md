@@ -12,7 +12,7 @@ The package can be installed as:
           [{:exstreme, "~> 0.0.3"}]
         end
 
-  2. Check the documentation: [available in Hex](https://hexdocs.pm/exstreme/doc/Exstreme.html)
+  2. Check the documentation: [available in Hex](https://hexdocs.pm/exstreme/Exstreme.html)
 
 ## Usage
 
