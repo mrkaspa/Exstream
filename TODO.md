@@ -1,2 +1,3 @@
+- Create a DSL - Improve API
 - Allow to extend the behaviour
-- Improve API
+- Integrate with GenStage
