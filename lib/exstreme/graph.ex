@@ -74,7 +74,7 @@ defmodule Exstreme.Graph do
   end
 
   @doc """
-  Gets the nodes before the current one
+  Gets the nodes before the current one
   """
   @spec get_before_nodes(t, atom) :: [atom]
   def get_before_nodes(%Graph{connections: connections}, gnode) do
