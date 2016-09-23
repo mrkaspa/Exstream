@@ -7,7 +7,7 @@ defmodule Exstreme.Graph do
   @typedoc """
   Represents the Graph data
   """
-  @type t :: %Graph{name: String.t,params: [key: term], nodes: %{key: [key: term]}, connections: %{key: atom}}
+  @type t :: %Graph{name: String.t, params: [key: term], nodes: %{key: [key: term]}, connections: %{key: atom}}
   defstruct name: '', params: [], nodes: %{}, connections: %{}
 
   @doc """
