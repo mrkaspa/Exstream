@@ -51,7 +51,7 @@ defmodule Exstreme.Mixfile do
   defp package do
     [# These are the default files included in the package
       name: :exstreme,
-      files: ["lib", "priv", "mix.exs", "README*", "readme*", "LICENSE*", "license*"],
+      files: ["lib", "mix.exs", "README*"],
       maintainers: ["Michel Perez"],
       licenses: ["Apache 2.0"],
       links: %{"GitHub" => "https://github.com/mrkaspa/exstreme"}
