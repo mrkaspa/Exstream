@@ -4,7 +4,7 @@ defmodule Exstreme.Mixfile do
   def project do
     [
       app: :exstreme,
-      version: "0.0.3",
+      version: "0.1.1",
       description: description,
       package: package,
       elixir: "~> 1.3",
